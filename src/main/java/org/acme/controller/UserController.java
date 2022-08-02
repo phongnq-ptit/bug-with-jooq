@@ -1,34 +1,35 @@
 package org.acme.controller;
 
-import static org.acme.jooq.tables.Users.USERS;
-
-import java.sql.SQLException;
+import org.acme.entity.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import org.acme.dto.UsersDTO;
-import org.acme.entity.UsersEntity;
 import org.acme.service.UserService;
-import org.jooq.DSLContext;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Path("/api/users")
-//@Produces(MediaType.APPLICATION_JSON)
-//@Consumes(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(path = "/api/users")
 public class UserController {
-  @Autowired UserService userService;
 
-  @GET
-  public void getUsers() throws SQLException {
-    System.out.println(111111);
-    userService.getUsers();
-//    dsl.select()
-//        .from(USERS)
-//        .fetchInto(UsersDTO.class);
+  private final UserService userService;
+
+  @Autowired
+  public UserController(UserService userService) {
+    this.userService = userService;
   }
+
+  @GetMapping
+  public List<Users> getUsers() {
+    return userService.getUsers();
+  }
+
+  @GetMapping("/{id}")
+  public Users getUser(@PathVariable("id") Long id) {
+    return userService.getUser(id);
+  }
+
+
 }

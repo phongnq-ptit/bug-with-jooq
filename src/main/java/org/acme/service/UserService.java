@@ -2,36 +2,40 @@ package org.acme.service;
 
 import static org.acme.jooq.tables.Users.USERS;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.acme.dto.UsersDTO;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.acme.config.DSLContextConfig;
+import org.acme.entity.Users;
+import org.acme.jooq.tables.records.UsersRecord;
 
+import org.springframework.stereotype.Service;
 
-import org.jooq.impl.DSL;
+@Service
+public class UserService extends DSLContextConfig {
 
-@Component
-@Slf4j
-public class UserService {
-
-  public void getUsers() throws SQLException {
-    Connection conn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/manage_hotel?autoReconnect=true", "root", "17102001abc!");
-    DSLContext context = DSL.using(conn, SQLDialect.MYSQL);
-    var result =  context.select().from(USERS);
-
-//    var userDto = modelMapper.map(order, OrderDTO.class);
-
-    System.out.println(2222);
-    System.out.println(result);
+  public UserService() throws SQLException {
+    super();
   }
 
+  public List<Users> getUsers(){
+    return context.selectFrom(USERS)
+        .fetch(row -> {
+          return new Users((long) row.getId(), row.getEmail(), row.getPassword(), row.getName(), row.getAddress(),
+              row.getPhone(), row.getAvatar(), row.getRole());
+        });
+  }
 
+  public Users getUser(Long id) {
+    UsersRecord row =  context.selectFrom(USERS).where(USERS.ID.eq(id.intValue())).fetchOne();
+
+    return new Users((long) row.getId(), row.getEmail(), row.getPassword(), row.getName(), row.getAddress(),
+        row.getPhone(), row.getAvatar(), row.getRole());
+  }
+
+//  public Users createUser(Users user) {
+//    var row = context.insertInto(USERS,
+//        USERS.NAME, USERS.EMAIL, USERS.PASSWORD, USERS.ADDRESS USERS.PHONE)
+//        .values(user.getName(),user.getEmail(), user.getPassword(), user.getAddress(), user.getPhone())
+//        .execute();
+//  }
 }
